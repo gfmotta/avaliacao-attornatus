@@ -2,6 +2,7 @@ package com.gfmotta.avaliacao.services;
 
 import java.util.List;
 
+import org.modelmapper.MappingException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import com.gfmotta.avaliacao.dtos.AddressDTO;
 import com.gfmotta.avaliacao.dtos.SimpleAddressDTO;
 import com.gfmotta.avaliacao.entities.Address;
 import com.gfmotta.avaliacao.repositories.AddressRepository;
+import com.gfmotta.avaliacao.services.exceptions.DatabaseException;
 import com.gfmotta.avaliacao.services.exceptions.ResourceNotFoundException;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -36,24 +38,32 @@ public class AddressService {
 	 * poderá fazer pelo endpoint de atualização(update) ou durante o cadastro do novo endereço*/
 	public AddressDTO insert(AddressDTO dto) {
 		validateAddress(dto);
-		Address address = mapper.map(dto, Address.class);
-		address = repository.save(address);
-		return mapper.map(address, AddressDTO.class);
+		Address entity = mapper.map(dto, Address.class);
+		entity = repository.save(entity);
+		return mapper.map(entity, AddressDTO.class);
 	}
 
 	public AddressDTO update(Long addressId, SimpleAddressDTO dto) {
 		try {
-			Address address = repository.getReferenceById(addressId);
+			Address entity = repository.getReferenceById(addressId);
 		
+			//Primeiro if verifica se há uma tentativa de definir um novo endereço principal
+			//Segundo if verifica se a pessoa está tentando desmarcar o endereço principal sem informar um novo
 			if (dto.isMainAddress()) {
-				changeMainAddress(address.getPerson().getId());
+				changeMainAddress(entity.getPerson().getId());
+			}
+			else if (entity.isMainAddress()) {
+				throw new DatabaseException("Operação negada! É necessario ter um endereço principal definido");
 			}
 			
-			mapper.map(dto, address);
-			address = repository.save(address);
-			return mapper.map(address, AddressDTO.class);
+			mapper.map(dto, entity);
+			entity = repository.save(entity);
+			return mapper.map(entity, AddressDTO.class);
 		}
 		catch(EntityNotFoundException e) {
+			throw new ResourceNotFoundException("O registro que está tentando atualizar não existe");
+		}
+		catch(MappingException e) {
 			throw new ResourceNotFoundException("O registro que está tentando atualizar não existe");
 		}
 	}

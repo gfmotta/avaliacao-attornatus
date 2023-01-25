@@ -7,11 +7,6 @@ public class AddressDTO extends SimpleAddressDTO {
 
 	@Positive(message = "O valor deve ser positivo")
 	private Long personId;
-	
-	public AddressDTO(Long personId) {
-		super();
-		this.personId = personId;
-	}
 
 	public Long getPersonId() {
 		return personId;
