@@ -38,6 +38,7 @@ public class AddressController {
 		return ResponseEntity.created(uri).body(dto);
 	}
 	
+	/**Endpoint que permitirá alterar o endereço padrão da pessoa e alterar outros dados referente ao endereço*/
 	@PutMapping(value = "/{addressId}")
 	public ResponseEntity<AddressDTO> update(@PathVariable Long addressId, @RequestBody SimpleAddressDTO dto) {
 		AddressDTO addressDto = service.update(addressId, dto);

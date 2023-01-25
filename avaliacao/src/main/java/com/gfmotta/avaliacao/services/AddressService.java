@@ -10,7 +10,10 @@ import com.gfmotta.avaliacao.dtos.AddressDTO;
 import com.gfmotta.avaliacao.dtos.SimpleAddressDTO;
 import com.gfmotta.avaliacao.entities.Address;
 import com.gfmotta.avaliacao.repositories.AddressRepository;
+import com.gfmotta.avaliacao.services.exceptions.DatabaseException;
+import com.gfmotta.avaliacao.services.exceptions.ResourceNotFoundException;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -29,27 +32,36 @@ public class AddressService {
 	}
 
 	public AddressDTO insert(AddressDTO dto) {
-		//exceção caso MainAddress seja nulo
-		if (dto.isMainAddress()) {
-			changeMainAddress(dto.getPersonId());
+		try {
+			if (dto.isMainAddress()) {
+				changeMainAddress(dto.getPersonId());
+			}
+			Address address = mapper.map(dto, Address.class);
+			address = repository.save(address);
+			return mapper.map(address, AddressDTO.class);
+		} 
+		catch(NullPointerException e) {
+			throw new DatabaseException("O campo MainAddres não pode ser nulo");
 		}
-		Address address = mapper.map(dto, Address.class);
-		address = repository.save(address);
-		return mapper.map(address, AddressDTO.class);
 	}
 
 	public AddressDTO update(Long addressId, SimpleAddressDTO dto) {
-		Address address = repository.getReferenceById(addressId);
-		
-		/**Caso dto seja verdadeiro e address falso, significa que o endereço principal esta sendo alterado,
-		 * Caso contrario não há necessidade de chamar o metodo changeMainAddress*/
-		if (dto.isMainAddress() && address.isMainAddress() == false) {
-			changeMainAddress(address.getPerson().getId());
+		try {
+			Address address = repository.getReferenceById(addressId);
+			
+			/**Caso dto seja verdadeiro e address falso, significa que o endereço principal esta sendo alterado,
+			 * Caso contrario não há necessidade de chamar o metodo changeMainAddress*/
+			if (dto.isMainAddress() && !address.isMainAddress()) {
+				changeMainAddress(address.getPerson().getId());
+			}
+			
+			mapper.map(dto, address);
+			address = repository.save(address);
+			return mapper.map(address, AddressDTO.class);
 		}
-		
-		mapper.map(dto, address);
-		address = repository.save(address);
-		return mapper.map(address, AddressDTO.class);
+		catch(EntityNotFoundException e) {
+			throw new ResourceNotFoundException("O registro que está tentando atualizar não existe");
+		}
 	}
 	
 	/**Metodo para marcar o antigo endereço principal da pessoa como falso,

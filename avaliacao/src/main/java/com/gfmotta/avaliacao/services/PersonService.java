@@ -3,6 +3,7 @@ package com.gfmotta.avaliacao.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.modelmapper.MappingException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.gfmotta.avaliacao.dtos.PersonDTO;
 import com.gfmotta.avaliacao.entities.Person;
 import com.gfmotta.avaliacao.repositories.PersonRepository;
+import com.gfmotta.avaliacao.services.exceptions.ResourceNotFoundException;
 
 import jakarta.transaction.Transactional;
 
@@ -25,7 +27,7 @@ public class PersonService {
 
 	public PersonDTO findById(Long id) {
 		Optional<Person> entity = repository.findById(id);
-		Person person = entity.orElseThrow(() -> new RuntimeException());
+		Person person = entity.orElseThrow(() -> new ResourceNotFoundException("Pessoa não encontrada"));
 		return mapper.map(person, PersonDTO.class);
 	}
 	
@@ -41,9 +43,14 @@ public class PersonService {
 	}
 
 	public PersonDTO update(Long id, PersonDTO dto) {
-		Person person = repository.getReferenceById(id);
-		mapper.map(dto, person);
-		person = repository.save(person);
-		return mapper.map(person, PersonDTO.class);
+		try {
+			Person person = repository.getReferenceById(id);
+			mapper.map(dto, person);
+			person = repository.save(person);
+			return mapper.map(person, PersonDTO.class);
+		}
+		catch(MappingException e) {
+			throw new ResourceNotFoundException("O registro que está tentando atualizar não existe");
+		}
 	}
 }
