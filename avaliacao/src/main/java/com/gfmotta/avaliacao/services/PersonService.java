@@ -41,9 +41,9 @@ public class PersonService {
 	}
 
 	public PersonDTO update(Long id, PersonDTO dto) {
-		Person entity = repository.getReferenceById(id);
-		mapper.map(dto, entity);
-		repository.save(entity);
-		return mapper.map(entity, PersonDTO.class);
+		Person person = repository.getReferenceById(id);
+		mapper.map(dto, person);
+		person = repository.save(person);
+		return mapper.map(person, PersonDTO.class);
 	}
 }
