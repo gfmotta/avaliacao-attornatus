@@ -18,6 +18,8 @@ import com.gfmotta.avaliacao.dtos.AddressDTO;
 import com.gfmotta.avaliacao.dtos.SimpleAddressDTO;
 import com.gfmotta.avaliacao.services.AddressService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping(value = "/address")
 public class AddressController {
@@ -32,7 +34,7 @@ public class AddressController {
 	}
 	
 	@PostMapping(value = "/new")
-	public ResponseEntity<AddressDTO> insert(@RequestBody AddressDTO dto) {
+	public ResponseEntity<AddressDTO> insert(@Valid @RequestBody AddressDTO dto) {
 		dto = service.insert(dto);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(dto.getId()).toUri();
 		return ResponseEntity.created(uri).body(dto);
@@ -40,7 +42,7 @@ public class AddressController {
 	
 	/**Endpoint que permitirá alterar o endereço padrão da pessoa e alterar outros dados referente ao endereço*/
 	@PutMapping(value = "/{addressId}")
-	public ResponseEntity<AddressDTO> update(@PathVariable Long addressId, @RequestBody SimpleAddressDTO dto) {
+	public ResponseEntity<AddressDTO> update(@PathVariable Long addressId, @Valid @RequestBody SimpleAddressDTO dto) {
 		AddressDTO addressDto = service.update(addressId, dto);
 		return ResponseEntity.ok().body(addressDto);
 	}

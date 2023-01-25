@@ -17,6 +17,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.gfmotta.avaliacao.dtos.PersonDTO;
 import com.gfmotta.avaliacao.services.PersonService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping(value = "/person")
 public class PersonController {
@@ -37,14 +39,14 @@ public class PersonController {
 	}
 	
 	@PostMapping(value = "/new")
-	public ResponseEntity<PersonDTO> insert(@RequestBody PersonDTO dto) {
+	public ResponseEntity<PersonDTO> insert(@Valid @RequestBody PersonDTO dto) {
 		dto = service.insert(dto);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(dto.getId()).toUri();
 		return ResponseEntity.created(uri).body(dto);
 	}
 	
 	@PutMapping(value = "/{personId}")
-	public ResponseEntity<PersonDTO> update(@PathVariable Long personId, @RequestBody PersonDTO dto) {
+	public ResponseEntity<PersonDTO> update(@PathVariable Long personId, @Valid @RequestBody PersonDTO dto) {
 		dto = service.update(personId, dto);
 		return ResponseEntity.ok().body(dto);
 	}

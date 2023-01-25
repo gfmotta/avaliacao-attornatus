@@ -10,7 +10,6 @@ import com.gfmotta.avaliacao.dtos.AddressDTO;
 import com.gfmotta.avaliacao.dtos.SimpleAddressDTO;
 import com.gfmotta.avaliacao.entities.Address;
 import com.gfmotta.avaliacao.repositories.AddressRepository;
-import com.gfmotta.avaliacao.services.exceptions.DatabaseException;
 import com.gfmotta.avaliacao.services.exceptions.ResourceNotFoundException;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -31,27 +30,22 @@ public class AddressService {
 		return entities.stream().map(x -> mapper.map(x, SimpleAddressDTO.class)).toList();
 	}
 
+	/**Para a criação de um endereço estou considerando como uma regra de negócio que o primeiro endereço
+	 * que a pessoa cadastrar deve ser considerado como o principal, assim será garantido que toda pessoa
+	 * terá um endereço principal. Caso a pessoa deseje definir outro endereço,
+	 * poderá fazer pelo endpoint de atualização(update) ou durante o cadastro do novo endereço*/
 	public AddressDTO insert(AddressDTO dto) {
-		try {
-			if (dto.isMainAddress()) {
-				changeMainAddress(dto.getPersonId());
-			}
-			Address address = mapper.map(dto, Address.class);
-			address = repository.save(address);
-			return mapper.map(address, AddressDTO.class);
-		} 
-		catch(NullPointerException e) {
-			throw new DatabaseException("O campo MainAddres não pode ser nulo");
-		}
+		validateAddress(dto);
+		Address address = mapper.map(dto, Address.class);
+		address = repository.save(address);
+		return mapper.map(address, AddressDTO.class);
 	}
 
 	public AddressDTO update(Long addressId, SimpleAddressDTO dto) {
 		try {
 			Address address = repository.getReferenceById(addressId);
-			
-			/**Caso dto seja verdadeiro e address falso, significa que o endereço principal esta sendo alterado,
-			 * Caso contrario não há necessidade de chamar o metodo changeMainAddress*/
-			if (dto.isMainAddress() && !address.isMainAddress()) {
+		
+			if (dto.isMainAddress()) {
 				changeMainAddress(address.getPerson().getId());
 			}
 			
@@ -64,13 +58,22 @@ public class AddressService {
 		}
 	}
 	
-	/**Metodo para marcar o antigo endereço principal da pessoa como falso,
-	 * para que haja apenas um unico endereço principal para a pessoa*/
+	/**Método para garantir que a pessoa tenha pelo menos um e somente um endereço principal*/
+	private void validateAddress(AddressDTO dto) {
+		List<Address> list = repository.findAllByPersonId(dto.getPersonId());
+		if (list.isEmpty()) {
+			dto.setMainAddress(true);
+		}
+		else if (dto.isMainAddress()) {
+			changeMainAddress(dto.getPersonId());
+		}
+	}
+	
+	/**Método usado para desmarcar o endereço principal antigo, 
+	 * garantindo assim que o novo endereço possa ser cadastrado sem quebrar a regra de endereço principal único*/
 	private void changeMainAddress(Long personId) {
 		Address entity = repository.findMainAddress(personId);
-		if (entity != null) {
-			entity.setMainAddress(false);
-			repository.save(entity);
-		}
+		entity.setMainAddress(false);
+		repository.save(entity);
 	}	
 }
