@@ -32,10 +32,12 @@ public class AddressService {
 		return entities.stream().map(x -> mapper.map(x, SimpleAddressDTO.class)).toList();
 	}
 
-	/**Para a criação de um endereço estou considerando como uma regra de negócio que o primeiro endereço
+	/**
+	 * Para a criação de um endereço estou considerando como uma regra de negócio que o primeiro endereço
 	 * que a pessoa cadastrar deve ser considerado como o principal, assim será garantido que toda pessoa
-	 * terá um endereço principal. Caso a pessoa deseje definir outro endereço,
-	 * poderá fazer pelo endpoint de atualização(update) ou durante o cadastro do novo endereço*/
+	 * terá um endereço principal. Caso a pessoa queira definir outro endereço,
+	 * poderá fazer pelo endpoint de atualização(update) ou durante o cadastro do novo endereço.
+	 */
 	public AddressDTO insert(AddressDTO dto) {
 		validateAddress(dto);
 		Address entity = mapper.map(dto, Address.class);
@@ -68,7 +70,9 @@ public class AddressService {
 		}
 	}
 	
-	/**Método para garantir que a pessoa tenha pelo menos um e somente um endereço principal*/
+	/**
+	 * Método para garantir que a pessoa tenha pelo menos um e somente um endereço principal.
+	 */
 	private void validateAddress(AddressDTO dto) {
 		List<Address> list = repository.findAllByPersonId(dto.getPersonId());
 		if (list.isEmpty()) {
@@ -79,8 +83,11 @@ public class AddressService {
 		}
 	}
 	
-	/**Método usado para desmarcar o endereço principal antigo, 
-	 * garantindo assim que o novo endereço possa ser cadastrado sem quebrar a regra de endereço principal único*/
+	/**
+	 * Método usado para desmarcar o endereço principal antigo, 
+	 * garantindo assim que o novo endereço possa ser cadastrado 
+	 * sem quebrar a regra de endereço principal único.
+	 */
 	private void changeMainAddress(Long personId) {
 		Address entity = repository.findMainAddress(personId);
 		entity.setMainAddress(false);

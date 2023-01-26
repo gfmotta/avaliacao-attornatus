@@ -1,4 +1,4 @@
-package com.gfmotta.avaliacao.controllers.exception;
+package com.gfmotta.avaliacao.controllers.exceptions;
 
 import java.io.Serializable;
 import java.time.Instant;
