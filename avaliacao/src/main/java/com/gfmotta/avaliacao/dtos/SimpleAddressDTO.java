@@ -18,6 +18,7 @@ public class SimpleAddressDTO implements Serializable {
 	private String zipCode;
 	
 	@Positive(message = "O valor deve ser positivo")
+	@NotNull(message = "O valor não pode ser nulo")
 	private Integer number;
 	
 	@NotBlank(message = "O campo deve conter pelo menos um caracter")

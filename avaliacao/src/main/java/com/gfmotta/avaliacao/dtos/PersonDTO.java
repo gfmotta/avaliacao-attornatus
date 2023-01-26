@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 
 public class PersonDTO implements Serializable {
@@ -15,6 +16,7 @@ public class PersonDTO implements Serializable {
 	private String name;
 	
 	@Past(message = "Data invalida")
+	@NotNull(message = "O valor não pode ser nulo")
 	private LocalDate birthDate;
 	
 	public PersonDTO() {
