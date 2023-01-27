@@ -26,7 +26,7 @@ public class Factory {
 	}
 	
 	public static AddressDTO newAddressDTO() {
-		AddressDTO dto = new AddressDTO(null, "Avenida Albert", "17800", 567, "Presidente Prudente", false, 1L);
+		AddressDTO dto = new AddressDTO(1L, "Avenida Albert", "17800", 567, "Presidente Prudente", false, 1L);
 		return dto;
 	}
 }

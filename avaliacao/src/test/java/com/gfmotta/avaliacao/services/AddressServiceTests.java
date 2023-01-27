@@ -102,7 +102,7 @@ public class AddressServiceTests {
 	}
 	
 	@Test
-	public void updateShouldThrowDatabaseExceptionWhenInvalidMainAddressRule() {
+	public void updateShouldThrowDatabaseExceptionWhenInvalidAddress() {
 		address.setMainAddress(true);
 		
 		Assertions.assertThrows(DatabaseException.class, () -> {
