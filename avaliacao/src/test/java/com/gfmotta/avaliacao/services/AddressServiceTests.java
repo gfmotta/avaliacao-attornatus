@@ -37,8 +37,8 @@ public class AddressServiceTests {
 	@Mock
 	private AddressRepository repository;
 	
-	private long existingId;
-	private long nonExistingId;
+	private Long existingId;
+	private Long nonExistingId;
 	private Address address;
 	private AddressDTO addressDto;
 	

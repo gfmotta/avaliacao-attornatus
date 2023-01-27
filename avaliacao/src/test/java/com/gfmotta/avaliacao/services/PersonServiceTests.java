@@ -35,8 +35,8 @@ public class PersonServiceTests {
 	@Mock
 	private PersonRepository repository;
 	
-	private long existingId;
-	private long nonExistingId;
+	private Long existingId;
+	private Long nonExistingId;
 	private Person person;
 	private PersonDTO personDto;
 	
